@@ -1,7 +1,9 @@
 services:
   bot:
-    image: ghcr.io/baranovskis/go-ytdlp-bot:latest
+    image: ghcr.io/baranovskis/go-ytdlp-bot:main
     container_name: ytdlp-bot
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - ./config.yaml:/app/config.yaml:ro
-    restart: unless-stopped
