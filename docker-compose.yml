@@ -1,0 +1,7 @@
+services:
+  bot:
+    image: ghcr.io/baranovskis/go-ytdlp-bot:latest
+    container_name: ytdlp-bot
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    restart: unless-stopped
