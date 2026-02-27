@@ -50,6 +50,27 @@ type Dashboard struct {
 	Password string `yaml:"password"`
 }
 
+type Video struct {
+	MaxHeight int `yaml:"maxHeight"`
+	Threads   int `yaml:"threads"`
+}
+
+// GetMaxHeight returns the max video height, defaulting to 720.
+func (v *Video) GetMaxHeight() int {
+	if v.MaxHeight <= 0 {
+		return 720
+	}
+	return v.MaxHeight
+}
+
+// GetThreads returns the ffmpeg thread count, defaulting to 2.
+func (v *Video) GetThreads() int {
+	if v.Threads <= 0 {
+		return 2
+	}
+	return v.Threads
+}
+
 type Config struct {
 	Verbose   bool      `yaml:"verbose"`
 	Storage   Storage   `yaml:"storage"`
@@ -57,6 +78,7 @@ type Config struct {
 	Cache     Cache     `yaml:"cache"`
 	Database  Database  `yaml:"database"`
 	Dashboard Dashboard `yaml:"dashboard"`
+	Video     Video     `yaml:"video"`
 }
 
 func GetConfiguration(configPath string) (*Config, error) {

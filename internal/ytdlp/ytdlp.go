@@ -3,6 +3,7 @@ package ytdlp
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/baranovskis/go-ytdlp-bot/internal/config"
 	"github.com/lrstanley/go-ytdlp"
 	"github.com/rs/zerolog"
@@ -14,12 +15,18 @@ type YtDlp struct {
 }
 
 func Init(cfg *config.Config, log zerolog.Logger) *YtDlp {
+	maxHeight := cfg.Video.GetMaxHeight()
+	threads := cfg.Video.GetThreads()
+
 	command := ytdlp.New().
-		FormatSort("res,vcodec:h264").
-		Format("bestvideo[vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4").
+		FormatSort(fmt.Sprintf("res:%d,vcodec:h264", maxHeight)).
+		Format(fmt.Sprintf(
+			"bestvideo[vcodec^=avc1][height<=%d]+bestaudio[ext=m4a]/bestvideo[ext=mp4][height<=%d]+bestaudio[ext=m4a]/best[height<=%d]/mp4",
+			maxHeight, maxHeight, maxHeight,
+		)).
 		MergeOutputFormat("mp4").
 		RecodeVideo("mp4").
-		PostProcessorArgs("ffmpeg:-c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -c:a aac -movflags +faststart").
+		PostProcessorArgs(fmt.Sprintf("ffmpeg:-threads %d -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -c:a aac -movflags +faststart", threads)).
 		NoOverwrites().
 		NoPlaylist().
 		PlaylistItems("1:1").

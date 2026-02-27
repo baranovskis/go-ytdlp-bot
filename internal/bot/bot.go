@@ -247,6 +247,23 @@ func (b *Bot) downloadVideoHandler(ctx context.Context, chat *bot.Bot, update *m
 	}
 	defer processedFile.Close()
 
+	const maxTelegramFileSize = 50 * 1024 * 1024 // 50 MB
+	if fi, statErr := processedFile.Stat(); statErr == nil && fi.Size() > maxTelegramFileSize {
+		b.Logger.Warn().
+			Str("file", result.Filename).
+			Int64("size_bytes", fi.Size()).
+			Msg("file exceeds Telegram 50 MB upload limit")
+		chat.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Video is too large to upload (exceeds 50 MB limit).",
+			ReplyParameters: &models.ReplyParameters{
+				MessageID: update.Message.ID,
+				ChatID:    update.Message.Chat.ID,
+			},
+		})
+		return
+	}
+
 	_, err = chat.SendMediaGroup(ctx, &bot.SendMediaGroupParams{
 		ChatID: update.Message.Chat.ID,
 		Media: []models.InputMedia{

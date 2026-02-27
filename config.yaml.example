@@ -11,3 +11,6 @@ dashboard:
   port: 8080
   username: "admin"
   password: "changeme"
+video:
+  maxHeight: 720
+  threads: 2
