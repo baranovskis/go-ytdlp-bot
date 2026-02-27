@@ -36,3 +36,11 @@ go.work.sum
 # internal
 config.yaml
 cookies_instagram.txt
+
+# runtime data
+data/
+temp/
+
+# tooling
+.claude/
+conductor/

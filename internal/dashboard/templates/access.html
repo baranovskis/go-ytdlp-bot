@@ -1,0 +1,129 @@
+{{define "title"}}Access Control{{end}}
+{{define "content"}}
+<h1 class="text-2xl font-bold mb-6">Access Control</h1>
+
+<div class="mb-8">
+    <h2 class="text-lg font-semibold mb-3">Pending Group Requests</h2>
+    <div class="overflow-x-auto">
+    <table class="w-full bg-white rounded-lg shadow text-sm">
+        <thead>
+            <tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">Chat ID</th><th class="px-3 py-2 text-left font-semibold">Title</th><th class="px-3 py-2 text-left font-semibold">Added</th><th class="px-3 py-2 text-left font-semibold">Actions</th></tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {{range .PendingGroups}}
+            <tr>
+                <td class="px-3 py-2">{{.ChatID}}</td>
+                <td class="px-3 py-2">{{.Title}}</td>
+                <td class="px-3 py-2 whitespace-nowrap">{{.AddedAt.Format "2006-01-02 15:04:05"}}</td>
+                <td class="px-3 py-2 whitespace-nowrap">
+                    <form method="POST" action="/access/groups/approve" class="inline">
+                        <input type="hidden" name="chat_id" value="{{.ChatID}}">
+                        <button type="submit" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">Approve</button>
+                    </form>
+                    <form method="POST" action="/access/groups/reject" class="inline">
+                        <input type="hidden" name="chat_id" value="{{.ChatID}}">
+                        <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {{else}}
+            <tr><td colspan="4" class="px-3 py-4 text-center text-gray-500">No pending requests</td></tr>
+            {{end}}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="mb-8">
+    <h2 class="text-lg font-semibold mb-3">Approved Groups</h2>
+    <div class="overflow-x-auto">
+    <table class="w-full bg-white rounded-lg shadow text-sm">
+        <thead>
+            <tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">Chat ID</th><th class="px-3 py-2 text-left font-semibold">Title</th><th class="px-3 py-2 text-left font-semibold">Added</th><th class="px-3 py-2 text-left font-semibold">Actions</th></tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {{range .AllowedGroups}}
+            <tr>
+                <td class="px-3 py-2">{{.ChatID}}</td>
+                <td class="px-3 py-2">{{.Title}}</td>
+                <td class="px-3 py-2 whitespace-nowrap">{{.AddedAt.Format "2006-01-02 15:04:05"}}</td>
+                <td class="px-3 py-2">
+                    <form method="POST" action="/access/groups/remove" class="inline">
+                        <input type="hidden" name="chat_id" value="{{.ChatID}}">
+                        <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {{else}}
+            <tr><td colspan="4" class="px-3 py-4 text-center text-gray-500">No approved groups</td></tr>
+            {{end}}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="mb-8">
+    <h2 class="text-lg font-semibold mb-3">Pending User Requests</h2>
+    <div class="overflow-x-auto">
+    <table class="w-full bg-white rounded-lg shadow text-sm">
+        <thead>
+            <tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">User ID</th><th class="px-3 py-2 text-left font-semibold">Username</th><th class="px-3 py-2 text-left font-semibold">Seen</th><th class="px-3 py-2 text-left font-semibold">Actions</th></tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {{range .PendingUsers}}
+            <tr>
+                <td class="px-3 py-2">{{.UserID}}</td>
+                <td class="px-3 py-2">{{.Username}}</td>
+                <td class="px-3 py-2 whitespace-nowrap">{{.AddedAt.Format "2006-01-02 15:04:05"}}</td>
+                <td class="px-3 py-2 whitespace-nowrap">
+                    <form method="POST" action="/access/users/approve" class="inline">
+                        <input type="hidden" name="user_id" value="{{.UserID}}">
+                        <button type="submit" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">Approve</button>
+                    </form>
+                    <form method="POST" action="/access/users/reject" class="inline">
+                        <input type="hidden" name="user_id" value="{{.UserID}}">
+                        <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {{else}}
+            <tr><td colspan="4" class="px-3 py-4 text-center text-gray-500">No pending user requests</td></tr>
+            {{end}}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<div class="mb-8">
+    <h2 class="text-lg font-semibold mb-3">Allowed Users</h2>
+    <form method="POST" action="/access/users/add" class="flex flex-col sm:flex-row gap-2 mb-4 items-stretch sm:items-center">
+        <input type="number" name="user_id" placeholder="Telegram User ID" required class="px-3 py-2 border border-gray-300 rounded text-sm">
+        <input type="text" name="username" placeholder="Username (optional)" class="px-3 py-2 border border-gray-300 rounded text-sm">
+        <button type="submit" class="bg-gray-900 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-800">Add User</button>
+    </form>
+    <div class="overflow-x-auto">
+    <table class="w-full bg-white rounded-lg shadow text-sm">
+        <thead>
+            <tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">User ID</th><th class="px-3 py-2 text-left font-semibold">Username</th><th class="px-3 py-2 text-left font-semibold">Added</th><th class="px-3 py-2 text-left font-semibold">Actions</th></tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {{range .AllowedUsers}}
+            <tr>
+                <td class="px-3 py-2">{{.UserID}}</td>
+                <td class="px-3 py-2">{{.Username}}</td>
+                <td class="px-3 py-2 whitespace-nowrap">{{.AddedAt.Format "2006-01-02 15:04:05"}}</td>
+                <td class="px-3 py-2">
+                    <form method="POST" action="/access/users/remove" class="inline">
+                        <input type="hidden" name="user_id" value="{{.UserID}}">
+                        <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {{else}}
+            <tr><td colspan="4" class="px-3 py-4 text-center text-gray-500">No allowed users</td></tr>
+            {{end}}
+        </tbody>
+    </table>
+    </div>
+</div>
+{{end}}

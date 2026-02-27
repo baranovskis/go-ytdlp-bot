@@ -1,34 +1,16 @@
+bot:
+  token: "<your telegram bot token>"
 storage:
   path: "temp"
   removeAfterReply: true
-bot:
-  token: "<your telegram bot token>"
-  filters:
-    - excludeQueryParams: false
-      hosts:
-        - "tiktok.com"
-        - "vm.tiktok.com"
-        - "www.tiktok.com"
-        - "www.vm.tiktok.com"
-    - excludeQueryParams: true
-      hosts:
-        - "instagram.com"
-        - "www.instagram.com"
-      cookiesFile: "cookies.txt"
-    - excludeQueryParams: true
-      hosts:
-        - "twitter.com"
-        - "www.twitter.com"
-        - "x.com"
-        - "www.x.com"
-        - "t.co"
-        - "www.t.co"
-    - excludeQueryParams: true
-      hosts:
-        - "facebook.com"
-        - "www.facebook.com"
-    - excludeQueryParams: true
-      hosts:
-        - "youtube.com"
-        - "www.youtube.com"
-      pathRegEx: "/shorts/"
+cache:
+  ttl: "5m"
+database:
+  path: "data/bot.db"
+dashboard:
+  port: 8080
+  username: "admin"
+  password: "changeme"
+accessControl:
+  enabled: false
+  defaultAllow: true

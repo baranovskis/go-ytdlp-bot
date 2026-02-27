@@ -1,0 +1,65 @@
+{{define "title"}}Downloads{{end}}
+{{define "content"}}
+<h1 class="text-2xl font-bold mb-6">Download History</h1>
+
+<div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+    <form method="GET" action="/downloads" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+        <select name="status" class="px-3 py-2 border border-gray-300 rounded text-sm">
+            <option value="">All Statuses</option>
+            <option value="success" {{if eq .Status "success"}}selected{{end}}>Success</option>
+            <option value="failed" {{if eq .Status "failed"}}selected{{end}}>Failed</option>
+            <option value="pending" {{if eq .Status "pending"}}selected{{end}}>Pending</option>
+        </select>
+        <button type="submit" class="bg-gray-900 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-800">Filter</button>
+    </form>
+    <span class="text-gray-500 text-sm">Total: {{.Total}}</span>
+</div>
+
+<div class="overflow-x-auto">
+<table class="w-full bg-white rounded-lg shadow text-sm">
+    <thead>
+        <tr class="bg-gray-50">
+            <th class="px-3 py-2 text-left font-semibold">ID</th>
+            <th class="px-3 py-2 text-left font-semibold">URL</th>
+            <th class="px-3 py-2 text-left font-semibold">User</th>
+            <th class="px-3 py-2 text-left font-semibold">Chat ID</th>
+            <th class="px-3 py-2 text-left font-semibold">Status</th>
+            <th class="px-3 py-2 text-left font-semibold">Filename</th>
+            <th class="px-3 py-2 text-left font-semibold">Time</th>
+        </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+        {{range .Downloads}}
+        <tr>
+            <td class="px-3 py-2">{{.ID}}</td>
+            <td class="px-3 py-2 max-w-xs truncate" title="{{.URL}}">{{.URL}}</td>
+            <td class="px-3 py-2 whitespace-nowrap">{{.TelegramUsername}} ({{.TelegramUserID}})</td>
+            <td class="px-3 py-2">{{.ChatID}}</td>
+            <td class="px-3 py-2">
+                {{if eq .Status "success"}}<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">success</span>
+                {{else if eq .Status "failed"}}<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">failed</span>
+                {{else}}<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">{{.Status}}</span>
+                {{end}}
+            </td>
+            <td class="px-3 py-2 max-w-[200px] truncate" title="{{.Filename}}">{{.Filename}}</td>
+            <td class="px-3 py-2 whitespace-nowrap">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</td>
+        </tr>
+        {{else}}
+        <tr><td colspan="7" class="px-3 py-4 text-center text-gray-500">No downloads found</td></tr>
+        {{end}}
+    </tbody>
+</table>
+</div>
+
+{{if gt .TotalPages 1}}
+<div class="flex gap-2 mt-4 justify-center flex-wrap">
+    {{if gt .Page 1}}
+    <a href="/downloads?page={{subtract .Page 1}}&status={{.Status}}" class="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">Prev</a>
+    {{end}}
+    <span class="px-3 py-1.5 bg-gray-900 text-white rounded text-sm">{{.Page}} / {{.TotalPages}}</span>
+    {{if lt .Page .TotalPages}}
+    <a href="/downloads?page={{add .Page 1}}&status={{.Status}}" class="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">Next</a>
+    {{end}}
+</div>
+{{end}}
+{{end}}

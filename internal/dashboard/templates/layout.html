@@ -1,0 +1,48 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{block "title" .}}Dashboard{{end}} - YT-DLP Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+    <nav class="bg-gray-900 text-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between h-14">
+                <span class="font-bold text-lg shrink-0">YT-DLP Bot</span>
+                <div class="hidden lg:flex items-center gap-5">
+                    <a href="/" class="text-gray-300 hover:text-white text-sm">Home</a>
+                    <a href="/downloads" class="text-gray-300 hover:text-white text-sm">Downloads</a>
+                    <a href="/logs" class="text-gray-300 hover:text-white text-sm">Logs</a>
+                    <a href="/stats" class="text-gray-300 hover:text-white text-sm">Statistics</a>
+                    <a href="/access" class="text-gray-300 hover:text-white text-sm">Access</a>
+                    <a href="/filters" class="text-gray-300 hover:text-white text-sm">Filters</a>
+                    <form method="POST" action="/logout" class="inline">
+                        <button type="submit" class="border border-gray-500 text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-1 rounded text-sm">Logout</button>
+                    </form>
+                </div>
+                <button class="lg:hidden text-white text-2xl leading-none" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" aria-label="Menu">&#9776;</button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden border-t border-gray-700">
+            <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-2">
+                <a href="/" class="text-gray-300 hover:text-white text-sm py-1">Home</a>
+                <a href="/downloads" class="text-gray-300 hover:text-white text-sm py-1">Downloads</a>
+                <a href="/logs" class="text-gray-300 hover:text-white text-sm py-1">Logs</a>
+                <a href="/stats" class="text-gray-300 hover:text-white text-sm py-1">Statistics</a>
+                <a href="/access" class="text-gray-300 hover:text-white text-sm py-1">Access</a>
+                <a href="/filters" class="text-gray-300 hover:text-white text-sm py-1">Filters</a>
+                <form method="POST" action="/logout">
+                    <button type="submit" class="border border-gray-500 text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-1 rounded text-sm mt-1">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    <main class="max-w-6xl mx-auto px-4 py-6">
+        {{template "content" .}}
+    </main>
+</body>
+</html>
+{{end}}

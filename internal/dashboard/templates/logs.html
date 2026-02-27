@@ -1,0 +1,120 @@
+{{define "title"}}Logs{{end}}
+{{define "content"}}
+<h1 class="text-2xl font-bold mb-6">Application Logs</h1>
+
+<div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+    <form method="GET" action="/logs" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+        <select name="level" class="px-3 py-2 border border-gray-300 rounded text-sm">
+            <option value="">All Levels</option>
+            <option value="debug" {{if eq .Level "debug"}}selected{{end}}>Debug</option>
+            <option value="info" {{if eq .Level "info"}}selected{{end}}>Info</option>
+            <option value="warn" {{if eq .Level "warn"}}selected{{end}}>Warn</option>
+            <option value="error" {{if eq .Level "error"}}selected{{end}}>Error</option>
+            <option value="fatal" {{if eq .Level "fatal"}}selected{{end}}>Fatal</option>
+        </select>
+        <input type="text" name="search" placeholder="Search messages..." value="{{.Search}}" class="px-3 py-2 border border-gray-300 rounded text-sm">
+        <button type="submit" class="bg-gray-900 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-800">Filter</button>
+    </form>
+    <span class="text-gray-500 text-sm">Total: {{.Total}}</span>
+    <label class="text-sm text-gray-600 sm:ml-auto flex items-center gap-1">
+        <input type="checkbox" id="live-toggle" checked> Live updates
+    </label>
+</div>
+
+<div class="overflow-x-auto">
+<table class="w-full bg-white rounded-lg shadow text-sm">
+    <thead>
+        <tr class="bg-gray-50">
+            <th class="px-3 py-2 text-left font-semibold w-[60px]">ID</th>
+            <th class="px-3 py-2 text-left font-semibold w-[70px]">Level</th>
+            <th class="px-3 py-2 text-left font-semibold">Message</th>
+            <th class="px-3 py-2 text-left font-semibold w-[160px]">Time</th>
+        </tr>
+    </thead>
+    <tbody id="log-body" class="divide-y divide-gray-100">
+        {{range .Logs}}
+        <tr>
+            <td class="px-3 py-2">{{.ID}}</td>
+            <td class="px-3 py-2"><span class="log-{{.Level}}">{{.Level}}</span></td>
+            <td class="px-3 py-2">{{.Message}}{{if and .Fields (ne .Fields "{}")}} <span class="text-gray-500">{{.Fields}}</span>{{end}}</td>
+            <td class="px-3 py-2 whitespace-nowrap">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</td>
+        </tr>
+        {{else}}
+        <tr id="no-logs-row"><td colspan="4" class="px-3 py-4 text-center text-gray-500">No logs found</td></tr>
+        {{end}}
+    </tbody>
+</table>
+</div>
+
+{{if gt .TotalPages 1}}
+<div class="flex gap-2 mt-4 justify-center flex-wrap">
+    {{if gt .Page 1}}
+    <a href="/logs?page={{subtract .Page 1}}&level={{.Level}}&search={{.Search}}" class="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">Prev</a>
+    {{end}}
+    <span class="px-3 py-1.5 bg-gray-900 text-white rounded text-sm">{{.Page}} / {{.TotalPages}}</span>
+    {{if lt .Page .TotalPages}}
+    <a href="/logs?page={{add .Page 1}}&level={{.Level}}&search={{.Search}}" class="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">Next</a>
+    {{end}}
+</div>
+{{end}}
+
+<style>
+.log-debug { color: #6b7280; }
+.log-info { color: #0c5460; }
+.log-warn { color: #92400e; }
+.log-error { color: #991b1b; }
+.log-fatal { color: #fff; background: #991b1b; padding: 0 0.3rem; border-radius: 2px; }
+</style>
+
+<script>
+(function() {
+    const toggle = document.getElementById('live-toggle');
+    const tbody = document.getElementById('log-body');
+    let es;
+
+    function connect() {
+        es = new EventSource('/api/logs/stream');
+        es.onmessage = function(e) {
+            const log = JSON.parse(e.data);
+            const noLogs = document.getElementById('no-logs-row');
+            if (noLogs) noLogs.remove();
+
+            const row = document.createElement('tr');
+            var fieldsStr = '';
+            if (log.fields && log.fields !== '{}') {
+                fieldsStr = ' <span class="text-gray-500">' + escapeHtml(log.fields) + '</span>';
+            }
+            row.innerHTML = '<td class="px-3 py-2">-</td>' +
+                '<td class="px-3 py-2"><span class="log-' + escapeHtml(log.level) + '">' + escapeHtml(log.level) + '</span></td>' +
+                '<td class="px-3 py-2">' + escapeHtml(log.message) + fieldsStr + '</td>' +
+                '<td class="px-3 py-2 whitespace-nowrap">' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '</td>';
+            tbody.insertBefore(row, tbody.firstChild);
+
+            if (tbody.children.length > 200) {
+                tbody.removeChild(tbody.lastChild);
+            }
+        };
+        es.onerror = function() {
+            es.close();
+            setTimeout(connect, 3000);
+        };
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    toggle.addEventListener('change', function() {
+        if (this.checked) {
+            connect();
+        } else if (es) {
+            es.close();
+        }
+    });
+
+    connect();
+})();
+</script>
+{{end}}

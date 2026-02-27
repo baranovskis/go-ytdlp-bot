@@ -15,7 +15,7 @@ type YtDlp struct {
 
 func Init(cfg *config.Config, log zerolog.Logger) *YtDlp {
 	command := ytdlp.New().
-		FormatSort("res,vcodec:h265,h264").
+		FormatSort("res,vcodec:h264,h265").
 		Format("bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4").
 		RecodeVideo("mp4").
 		NoOverwrites().
