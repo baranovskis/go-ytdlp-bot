@@ -1,5 +1,7 @@
 services:
   bot:
+    # CPU-only: ghcr.io/baranovskis/go-ytdlp-bot:main
+    # Intel VAAPI: ghcr.io/baranovskis/go-ytdlp-bot:main-vaapi
     image: ghcr.io/baranovskis/go-ytdlp-bot:main
     container_name: ytdlp-bot
     restart: unless-stopped
@@ -8,13 +10,6 @@ services:
     volumes:
       - ./config.yaml:/app/config.yaml:ro
       - ./data:/app/data
-    # GPU passthrough (uncomment for hardware encoding):
-    #
-    # Intel VAAPI (set encoder: "h264_vaapi" in config.yaml):
+    # GPU passthrough (uncomment for VAAPI, use main-vaapi image):
     # devices:
     #   - /dev/dri:/dev/dri
-    #
-    # NVIDIA NVENC (set encoder: "h264_nvenc" in config.yaml):
-    # runtime: nvidia
-    # environment:
-    #   - NVIDIA_VISIBLE_DEVICES=all

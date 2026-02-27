@@ -32,7 +32,14 @@ func Init(cfg *config.Config, log zerolog.Logger) *YtDlp {
 	threads := cfg.Video.GetThreads()
 	encoder := cfg.Video.GetEncoder()
 
+	log.Info().
+		Str("encoder", encoder).
+		Int("max_height", maxHeight).
+		Int("threads", threads).
+		Msg("video settings initialized")
+
 	command := ytdlp.New().
+		Verbose().
 		FormatSort(fmt.Sprintf("res:%d,vcodec:h264", maxHeight)).
 		Format(fmt.Sprintf(
 			"bestvideo[vcodec^=avc1][height<=%d]+bestaudio[ext=m4a]/bestvideo[ext=mp4][height<=%d]+bestaudio[ext=m4a]/best[height<=%d]/mp4",
@@ -58,10 +65,6 @@ func Init(cfg *config.Config, log zerolog.Logger) *YtDlp {
 		SetWorkDir(cfg.Storage.Path).
 		Output("%(extractor)s_%(id)s.%(ext)s").
 		PrintJSON()
-
-	if cfg.Verbose {
-		command.Verbose()
-	}
 
 	return &YtDlp{
 		Command: command,

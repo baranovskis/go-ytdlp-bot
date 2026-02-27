@@ -72,13 +72,19 @@ func (v *Video) GetThreads() int {
 	return v.Threads
 }
 
-// GetEncoder returns the video encoder, defaulting to "libx264" (CPU).
-// Supported: libx264, h264_nvenc, h264_vaapi, h264_qsv.
+// GetEncoder returns the video encoder. If set to "auto" or left empty,
+// it detects available hardware: VAAPI (/dev/dri/renderD128) first,
+// then falls back to libx264 (CPU).
+// Supported: auto, libx264, h264_nvenc, h264_vaapi, h264_qsv.
 func (v *Video) GetEncoder() string {
 	switch v.Encoder {
-	case "h264_nvenc", "h264_vaapi", "h264_qsv":
+	case "h264_nvenc", "h264_vaapi", "h264_qsv", "libx264":
 		return v.Encoder
 	default:
+		// Auto-detect: check for VAAPI device
+		if _, err := os.Stat("/dev/dri/renderD128"); err == nil {
+			return "h264_vaapi"
+		}
 		return "libx264"
 	}
 }
