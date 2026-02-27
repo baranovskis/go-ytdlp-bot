@@ -3,8 +3,8 @@
 <h1 class="text-2xl font-bold mb-6">Application Logs</h1>
 
 <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-    <form method="GET" action="/logs" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-        <select name="level" class="px-3 py-2 border border-gray-300 rounded text-sm">
+    <form method="GET" action="/logs" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full sm:w-auto">
+        <select name="level" class="px-3 py-2 border border-gray-300 rounded text-sm bg-white">
             <option value="">All Levels</option>
             <option value="debug" {{if eq .Level "debug"}}selected{{end}}>Debug</option>
             <option value="info" {{if eq .Level "info"}}selected{{end}}>Info</option>
@@ -13,15 +13,18 @@
             <option value="fatal" {{if eq .Level "fatal"}}selected{{end}}>Fatal</option>
         </select>
         <input type="text" name="search" placeholder="Search messages..." value="{{.Search}}" class="px-3 py-2 border border-gray-300 rounded text-sm">
-        <button type="submit" class="bg-gray-900 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-800">Filter</button>
+        <button type="submit" class="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-800">Filter</button>
     </form>
-    <span class="text-gray-500 text-sm">Total: {{.Total}}</span>
-    <label class="text-sm text-gray-600 sm:ml-auto flex items-center gap-1">
-        <input type="checkbox" id="live-toggle" checked> Live updates
-    </label>
+    <div class="flex items-center justify-between sm:justify-start gap-3 sm:ml-auto">
+        <span class="text-gray-500 text-sm">Total: {{.Total}}</span>
+        <label class="text-sm text-gray-600 flex items-center gap-1">
+            <input type="checkbox" id="live-toggle" checked> Live
+        </label>
+    </div>
 </div>
 
-<div class="overflow-x-auto">
+<!-- Desktop table -->
+<div class="hidden md:block overflow-x-auto">
 <table class="w-full bg-white rounded-lg shadow text-sm">
     <thead>
         <tr class="bg-gray-50">
@@ -44,6 +47,22 @@
         {{end}}
     </tbody>
 </table>
+</div>
+
+<!-- Mobile cards -->
+<div id="log-cards" class="md:hidden space-y-2">
+    {{range .Logs}}
+    <div class="bg-white rounded-lg shadow px-4 py-3">
+        <div class="flex items-center justify-between mb-1">
+            <span class="log-{{.Level}} text-xs font-semibold uppercase">{{.Level}}</span>
+            <span class="text-xs text-gray-400">{{.CreatedAt.Format "Jan 02, 15:04:05"}}</span>
+        </div>
+        <div class="text-sm text-gray-800 break-words">{{.Message}}</div>
+        {{if and .Fields (ne .Fields "{}")}}<div class="text-xs text-gray-400 break-all mt-1">{{.Fields}}</div>{{end}}
+    </div>
+    {{else}}
+    <div id="no-logs-card" class="bg-white rounded-lg shadow p-6 text-center text-gray-500 text-sm">No logs found</div>
+    {{end}}
 </div>
 
 {{if gt .TotalPages 1}}
@@ -70,28 +89,52 @@
 (function() {
     const toggle = document.getElementById('live-toggle');
     const tbody = document.getElementById('log-body');
+    const cards = document.getElementById('log-cards');
     let es;
 
     function connect() {
         es = new EventSource('/api/logs/stream');
         es.onmessage = function(e) {
             const log = JSON.parse(e.data);
+
+            // Remove "no logs" placeholders
             const noLogs = document.getElementById('no-logs-row');
             if (noLogs) noLogs.remove();
+            const noLogsCard = document.getElementById('no-logs-card');
+            if (noLogsCard) noLogsCard.remove();
 
-            const row = document.createElement('tr');
             var fieldsStr = '';
             if (log.fields && log.fields !== '{}') {
                 fieldsStr = ' <span class="text-gray-500">' + escapeHtml(log.fields) + '</span>';
             }
-            row.innerHTML = '<td class="px-3 py-2">-</td>' +
-                '<td class="px-3 py-2"><span class="log-' + escapeHtml(log.level) + '">' + escapeHtml(log.level) + '</span></td>' +
-                '<td class="px-3 py-2">' + escapeHtml(log.message) + fieldsStr + '</td>' +
-                '<td class="px-3 py-2 whitespace-nowrap">' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '</td>';
-            tbody.insertBefore(row, tbody.firstChild);
 
-            if (tbody.children.length > 200) {
-                tbody.removeChild(tbody.lastChild);
+            // Desktop table row
+            if (tbody) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td class="px-3 py-2">-</td>' +
+                    '<td class="px-3 py-2"><span class="log-' + escapeHtml(log.level) + '">' + escapeHtml(log.level) + '</span></td>' +
+                    '<td class="px-3 py-2">' + escapeHtml(log.message) + fieldsStr + '</td>' +
+                    '<td class="px-3 py-2 whitespace-nowrap">' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '</td>';
+                tbody.insertBefore(row, tbody.firstChild);
+                if (tbody.children.length > 200) tbody.removeChild(tbody.lastChild);
+            }
+
+            // Mobile card
+            if (cards) {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow px-4 py-3';
+                var fieldsCard = '';
+                if (log.fields && log.fields !== '{}') {
+                    fieldsCard = '<div class="text-xs text-gray-400 break-all mt-1">' + escapeHtml(log.fields) + '</div>';
+                }
+                const now = new Date();
+                const timeStr = now.toLocaleString('en-US', {month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).replace(',','');
+                card.innerHTML = '<div class="flex items-center justify-between mb-1">' +
+                    '<span class="log-' + escapeHtml(log.level) + ' text-xs font-semibold uppercase">' + escapeHtml(log.level) + '</span>' +
+                    '<span class="text-xs text-gray-400">' + timeStr + '</span></div>' +
+                    '<div class="text-sm text-gray-800 break-words">' + escapeHtml(log.message) + '</div>' + fieldsCard;
+                cards.insertBefore(card, cards.firstChild);
+                if (cards.children.length > 100) cards.removeChild(cards.lastChild);
             }
         };
         es.onerror = function() {

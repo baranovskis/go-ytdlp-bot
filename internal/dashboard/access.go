@@ -84,24 +84,6 @@ func (s *Server) removeGroupHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/access", http.StatusSeeOther)
 }
 
-func (s *Server) addUserHandler(w http.ResponseWriter, r *http.Request) {
-	userID, _ := strconv.ParseInt(r.FormValue("user_id"), 10, 64)
-	username := r.FormValue("username")
-
-	if userID == 0 {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	if err := s.DB.AddAllowedUser(userID, username); err != nil {
-		s.Logger.Error().Str("reason", err.Error()).Msg("failed add user")
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/access", http.StatusSeeOther)
-}
-
 func (s *Server) approveUserHandler(w http.ResponseWriter, r *http.Request) {
 	userID, _ := strconv.ParseInt(r.FormValue("user_id"), 10, 64)
 	if userID == 0 {

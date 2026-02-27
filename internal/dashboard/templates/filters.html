@@ -5,17 +5,17 @@
 
 <div class="mb-8">
     <h2 class="text-lg font-semibold mb-3">Add New Filter</h2>
-    <form method="POST" action="/filters/add" class="bg-white rounded-lg shadow p-5">
+    <form method="POST" action="/filters/add" class="bg-white rounded-lg shadow p-4 sm:p-5">
         <div class="mb-4">
             <label for="new-hosts" class="block text-sm font-medium text-gray-700 mb-1">Hosts (one per line or comma-separated)</label>
             <textarea id="new-hosts" name="hosts" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded text-sm font-mono focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="example.com&#10;www.example.com" required></textarea>
         </div>
-        <div class="flex flex-col sm:flex-row gap-4 mb-4">
-            <div class="flex-1 min-w-[200px]">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
                 <label for="new-path-regex" class="block text-sm font-medium text-gray-700 mb-1">Path Regex (optional)</label>
                 <input type="text" id="new-path-regex" name="path_regex" placeholder="/shorts/" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
             </div>
-            <div class="flex-1 min-w-[200px]">
+            <div>
                 <label for="new-cookies" class="block text-sm font-medium text-gray-700 mb-1">Cookies File (optional)</label>
                 <input type="text" id="new-cookies" name="cookies_file" placeholder="cookies.txt" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
             </div>
@@ -23,26 +23,26 @@
         <label class="flex items-center gap-2 text-sm text-gray-700 mb-4">
             <input type="checkbox" name="exclude_query_params"> Exclude query parameters
         </label>
-        <button type="submit" class="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-800">Add Filter</button>
+        <button type="submit" class="w-full sm:w-auto bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-800">Add Filter</button>
     </form>
 </div>
 
 <div class="mb-8">
     <h2 class="text-lg font-semibold mb-3">Existing Filters</h2>
     {{range .Filters}}
-    <form method="POST" action="/filters/update" class="bg-white rounded-lg shadow p-5 mb-4">
+    <form method="POST" action="/filters/update" class="bg-white rounded-lg shadow p-4 sm:p-5 mb-4">
         <input type="hidden" name="id" value="{{.ID}}">
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Hosts</label>
             <textarea name="hosts" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded text-sm font-mono focus:outline-none focus:ring-2 focus:ring-gray-900" required>{{range $i, $h := .Hosts}}{{if $i}}
 {{end}}{{$h}}{{end}}</textarea>
         </div>
-        <div class="flex flex-col sm:flex-row gap-4 mb-4">
-            <div class="flex-1 min-w-[200px]">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Path Regex</label>
                 <input type="text" name="path_regex" value="{{.PathRegex}}" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
             </div>
-            <div class="flex-1 min-w-[200px]">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Cookies File</label>
                 <input type="text" name="cookies_file" value="{{.CookiesFile}}" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
             </div>
@@ -50,9 +50,9 @@
         <label class="flex items-center gap-2 text-sm text-gray-700 mb-4">
             <input type="checkbox" name="exclude_query_params" {{if .ExcludeQueryParams}}checked{{end}}> Exclude query parameters
         </label>
-        <div class="flex gap-2">
-            <button type="submit" class="bg-gray-900 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-800">Save</button>
-            <button type="submit" formaction="/filters/delete" class="bg-red-600 text-white px-3 py-1.5 rounded text-sm hover:bg-red-700">Delete</button>
+        <div class="flex flex-col sm:flex-row gap-2">
+            <button type="submit" class="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-800 w-full sm:w-auto">Save</button>
+            <button type="submit" formaction="/filters/delete" class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 w-full sm:w-auto">Delete</button>
         </div>
     </form>
     {{else}}

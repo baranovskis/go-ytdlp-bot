@@ -1,129 +1,131 @@
 {{define "title"}}Access Control{{end}}
 {{define "content"}}
-<h1 class="text-2xl font-bold mb-6">Access Control</h1>
+<h1 class="text-2xl font-bold mb-2">Access Control</h1>
+<p class="text-gray-500 text-sm mb-6">Approve groups and users to grant bot access. Groups appear when the bot is added; users appear when they message the bot directly.</p>
 
-<div class="mb-8">
-    <h2 class="text-lg font-semibold mb-3">Pending Group Requests</h2>
-    <div class="overflow-x-auto">
-    <table class="w-full bg-white rounded-lg shadow text-sm">
-        <thead>
-            <tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">Chat ID</th><th class="px-3 py-2 text-left font-semibold">Title</th><th class="px-3 py-2 text-left font-semibold">Added</th><th class="px-3 py-2 text-left font-semibold">Actions</th></tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Groups Column -->
+    <div class="space-y-4">
+        <h2 class="text-lg font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+            Groups
+        </h2>
+
+        {{if .PendingGroups}}
+        <div class="space-y-3">
             {{range .PendingGroups}}
-            <tr>
-                <td class="px-3 py-2">{{.ChatID}}</td>
-                <td class="px-3 py-2">{{.Title}}</td>
-                <td class="px-3 py-2 whitespace-nowrap">{{.AddedAt.Format "2006-01-02 15:04:05"}}</td>
-                <td class="px-3 py-2 whitespace-nowrap">
-                    <form method="POST" action="/access/groups/approve" class="inline">
+            <div class="bg-white rounded-lg shadow overflow-hidden border-l-4 border-amber-400">
+                <div class="px-4 py-3">
+                    <div class="text-xs font-medium text-amber-600 uppercase tracking-wide mb-1">Pending</div>
+                    <div class="font-semibold text-sm">{{.Title}}</div>
+                    <div class="text-xs text-gray-400 font-mono mt-0.5">{{.ChatID}}</div>
+                </div>
+                <div class="flex border-t border-gray-100">
+                    <form method="POST" action="/access/groups/approve" class="flex-1">
                         <input type="hidden" name="chat_id" value="{{.ChatID}}">
-                        <button type="submit" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">Approve</button>
+                        <button type="submit" class="w-full py-2.5 text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors">Approve</button>
                     </form>
-                    <form method="POST" action="/access/groups/reject" class="inline">
+                    <form method="POST" action="/access/groups/reject" class="flex-1 border-l border-gray-100">
                         <input type="hidden" name="chat_id" value="{{.ChatID}}">
-                        <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Reject</button>
+                        <button type="submit" class="w-full py-2.5 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors">Reject</button>
                     </form>
-                </td>
-            </tr>
-            {{else}}
-            <tr><td colspan="4" class="px-3 py-4 text-center text-gray-500">No pending requests</td></tr>
+                </div>
+            </div>
             {{end}}
-        </tbody>
-    </table>
-    </div>
-</div>
+        </div>
+        {{end}}
 
-<div class="mb-8">
-    <h2 class="text-lg font-semibold mb-3">Approved Groups</h2>
-    <div class="overflow-x-auto">
-    <table class="w-full bg-white rounded-lg shadow text-sm">
-        <thead>
-            <tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">Chat ID</th><th class="px-3 py-2 text-left font-semibold">Title</th><th class="px-3 py-2 text-left font-semibold">Added</th><th class="px-3 py-2 text-left font-semibold">Actions</th></tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            {{range .AllowedGroups}}
-            <tr>
-                <td class="px-3 py-2">{{.ChatID}}</td>
-                <td class="px-3 py-2">{{.Title}}</td>
-                <td class="px-3 py-2 whitespace-nowrap">{{.AddedAt.Format "2006-01-02 15:04:05"}}</td>
-                <td class="px-3 py-2">
-                    <form method="POST" action="/access/groups/remove" class="inline">
-                        <input type="hidden" name="chat_id" value="{{.ChatID}}">
-                        <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Remove</button>
-                    </form>
-                </td>
-            </tr>
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-4 py-3 border-b border-gray-100">
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Approved</div>
+            </div>
+            {{if .AllowedGroups}}
+            <div class="divide-y divide-gray-50">
+                {{range .AllowedGroups}}
+                <div class="flex items-center justify-between gap-3 px-4 py-3">
+                    <div class="min-w-0">
+                        <div class="font-medium text-sm truncate">{{.Title}}</div>
+                        <div class="text-xs text-gray-400 font-mono">{{.ChatID}}</div>
+                    </div>
+                    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                        <span class="text-xs text-gray-400 hidden sm:inline">{{.AddedAt.Format "Jan 02, 2006"}}</span>
+                        <form method="POST" action="/access/groups/remove">
+                            <input type="hidden" name="chat_id" value="{{.ChatID}}">
+                            <button type="submit" class="text-gray-300 hover:text-red-500 transition-colors p-1" title="Remove">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {{end}}
+            </div>
             {{else}}
-            <tr><td colspan="4" class="px-3 py-4 text-center text-gray-500">No approved groups</td></tr>
+            <div class="px-4 py-8 text-center text-gray-400 text-sm">No approved groups yet.<br>Add the bot to a Telegram group to get started.</div>
             {{end}}
-        </tbody>
-    </table>
+        </div>
     </div>
-</div>
 
-<div class="mb-8">
-    <h2 class="text-lg font-semibold mb-3">Pending User Requests</h2>
-    <div class="overflow-x-auto">
-    <table class="w-full bg-white rounded-lg shadow text-sm">
-        <thead>
-            <tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">User ID</th><th class="px-3 py-2 text-left font-semibold">Username</th><th class="px-3 py-2 text-left font-semibold">Seen</th><th class="px-3 py-2 text-left font-semibold">Actions</th></tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
+    <!-- Users Column -->
+    <div class="space-y-4">
+        <h2 class="text-lg font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+            Users
+        </h2>
+
+        {{if .PendingUsers}}
+        <div class="space-y-3">
             {{range .PendingUsers}}
-            <tr>
-                <td class="px-3 py-2">{{.UserID}}</td>
-                <td class="px-3 py-2">{{.Username}}</td>
-                <td class="px-3 py-2 whitespace-nowrap">{{.AddedAt.Format "2006-01-02 15:04:05"}}</td>
-                <td class="px-3 py-2 whitespace-nowrap">
-                    <form method="POST" action="/access/users/approve" class="inline">
+            <div class="bg-white rounded-lg shadow overflow-hidden border-l-4 border-amber-400">
+                <div class="px-4 py-3">
+                    <div class="text-xs font-medium text-amber-600 uppercase tracking-wide mb-1">Pending</div>
+                    <div class="font-semibold text-sm">{{.Username}}</div>
+                    <div class="text-xs text-gray-400 font-mono mt-0.5">{{.UserID}}</div>
+                </div>
+                <div class="flex border-t border-gray-100">
+                    <form method="POST" action="/access/users/approve" class="flex-1">
                         <input type="hidden" name="user_id" value="{{.UserID}}">
-                        <button type="submit" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">Approve</button>
+                        <button type="submit" class="w-full py-2.5 text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors">Approve</button>
                     </form>
-                    <form method="POST" action="/access/users/reject" class="inline">
+                    <form method="POST" action="/access/users/reject" class="flex-1 border-l border-gray-100">
                         <input type="hidden" name="user_id" value="{{.UserID}}">
-                        <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Reject</button>
+                        <button type="submit" class="w-full py-2.5 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors">Reject</button>
                     </form>
-                </td>
-            </tr>
-            {{else}}
-            <tr><td colspan="4" class="px-3 py-4 text-center text-gray-500">No pending user requests</td></tr>
+                </div>
+            </div>
             {{end}}
-        </tbody>
-    </table>
-    </div>
-</div>
+        </div>
+        {{end}}
 
-<div class="mb-8">
-    <h2 class="text-lg font-semibold mb-3">Allowed Users</h2>
-    <form method="POST" action="/access/users/add" class="flex flex-col sm:flex-row gap-2 mb-4 items-stretch sm:items-center">
-        <input type="number" name="user_id" placeholder="Telegram User ID" required class="px-3 py-2 border border-gray-300 rounded text-sm">
-        <input type="text" name="username" placeholder="Username (optional)" class="px-3 py-2 border border-gray-300 rounded text-sm">
-        <button type="submit" class="bg-gray-900 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-800">Add User</button>
-    </form>
-    <div class="overflow-x-auto">
-    <table class="w-full bg-white rounded-lg shadow text-sm">
-        <thead>
-            <tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">User ID</th><th class="px-3 py-2 text-left font-semibold">Username</th><th class="px-3 py-2 text-left font-semibold">Added</th><th class="px-3 py-2 text-left font-semibold">Actions</th></tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            {{range .AllowedUsers}}
-            <tr>
-                <td class="px-3 py-2">{{.UserID}}</td>
-                <td class="px-3 py-2">{{.Username}}</td>
-                <td class="px-3 py-2 whitespace-nowrap">{{.AddedAt.Format "2006-01-02 15:04:05"}}</td>
-                <td class="px-3 py-2">
-                    <form method="POST" action="/access/users/remove" class="inline">
-                        <input type="hidden" name="user_id" value="{{.UserID}}">
-                        <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Remove</button>
-                    </form>
-                </td>
-            </tr>
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-4 py-3 border-b border-gray-100">
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Approved</div>
+            </div>
+            {{if .AllowedUsers}}
+            <div class="divide-y divide-gray-50">
+                {{range .AllowedUsers}}
+                <div class="flex items-center justify-between gap-3 px-4 py-3">
+                    <div class="min-w-0">
+                        <div class="font-medium text-sm truncate">{{.Username}}</div>
+                        <div class="text-xs text-gray-400 font-mono">{{.UserID}}</div>
+                    </div>
+                    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                        <span class="text-xs text-gray-400 hidden sm:inline">{{.AddedAt.Format "Jan 02, 2006"}}</span>
+                        <form method="POST" action="/access/users/remove">
+                            <input type="hidden" name="user_id" value="{{.UserID}}">
+                            <button type="submit" class="text-gray-300 hover:text-red-500 transition-colors p-1" title="Remove">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {{end}}
+            </div>
             {{else}}
-            <tr><td colspan="4" class="px-3 py-4 text-center text-gray-500">No allowed users</td></tr>
+            <div class="px-4 py-8 text-center text-gray-400 text-sm">No approved users yet.<br>Users appear when they message the bot directly.</div>
             {{end}}
-        </tbody>
-    </table>
+        </div>
     </div>
+
 </div>
 {{end}}

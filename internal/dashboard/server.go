@@ -76,7 +76,6 @@ func (s *Server) Run(ctx context.Context) {
 	mux.HandleFunc("POST /access/groups/remove", s.requireAuth(s.removeGroupHandler))
 	mux.HandleFunc("POST /access/users/approve", s.requireAuth(s.approveUserHandler))
 	mux.HandleFunc("POST /access/users/reject", s.requireAuth(s.rejectUserHandler))
-	mux.HandleFunc("POST /access/users/add", s.requireAuth(s.addUserHandler))
 	mux.HandleFunc("POST /access/users/remove", s.requireAuth(s.removeUserHandler))
 	mux.HandleFunc("GET /filters", s.requireAuth(s.filtersPage))
 	mux.HandleFunc("POST /filters/add", s.requireAuth(s.addFilterHandler))

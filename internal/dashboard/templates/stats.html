@@ -2,55 +2,79 @@
 {{define "content"}}
 <h1 class="text-2xl font-bold mb-6">Statistics</h1>
 
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-    <div class="bg-white rounded-lg shadow p-5 text-center">
-        <div class="text-3xl font-bold text-gray-900" id="stat-total">{{.TotalDownloads}}</div>
-        <div class="text-sm text-gray-500 mt-1">Total Downloads</div>
+<div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 mb-8">
+    <div class="bg-white rounded-lg shadow p-4 sm:p-5 text-center">
+        <div class="text-2xl sm:text-3xl font-bold text-gray-900" id="stat-total">{{.TotalDownloads}}</div>
+        <div class="text-xs sm:text-sm text-gray-500 mt-1">Total Downloads</div>
     </div>
-    <div class="bg-white rounded-lg shadow p-5 text-center">
-        <div class="text-3xl font-bold text-gray-900" id="stat-success">{{.Succeeded}}</div>
-        <div class="text-sm text-gray-500 mt-1">Successful</div>
+    <div class="bg-white rounded-lg shadow p-4 sm:p-5 text-center">
+        <div class="text-2xl sm:text-3xl font-bold text-gray-900" id="stat-success">{{.Succeeded}}</div>
+        <div class="text-xs sm:text-sm text-gray-500 mt-1">Successful</div>
     </div>
-    <div class="bg-white rounded-lg shadow p-5 text-center">
-        <div class="text-3xl font-bold text-gray-900" id="stat-failed">{{.Failed}}</div>
-        <div class="text-sm text-gray-500 mt-1">Failed</div>
+    <div class="bg-white rounded-lg shadow p-4 sm:p-5 text-center">
+        <div class="text-2xl sm:text-3xl font-bold text-gray-900" id="stat-failed">{{.Failed}}</div>
+        <div class="text-xs sm:text-sm text-gray-500 mt-1">Failed</div>
     </div>
-    <div class="bg-white rounded-lg shadow p-5 text-center">
-        <div class="text-3xl font-bold text-gray-900" id="stat-users">{{.ActiveUsers}}</div>
-        <div class="text-sm text-gray-500 mt-1">Active Users</div>
+    <div class="bg-white rounded-lg shadow p-4 sm:p-5 text-center">
+        <div class="text-2xl sm:text-3xl font-bold text-gray-900" id="stat-users">{{.ActiveUsers}}</div>
+        <div class="text-xs sm:text-sm text-gray-500 mt-1">Active Users</div>
     </div>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="mb-6">
         <h2 class="text-lg font-semibold mb-3">Top Source Domains</h2>
-        <div class="overflow-x-auto">
-        <table class="w-full bg-white rounded-lg shadow text-sm">
-            <thead><tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">Domain</th><th class="px-3 py-2 text-left font-semibold">Downloads</th></tr></thead>
-            <tbody id="top-domains" class="divide-y divide-gray-100">
+        <div class="bg-white rounded-lg shadow">
+            <!-- Desktop table -->
+            <table class="hidden sm:table w-full text-sm">
+                <thead><tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">Domain</th><th class="px-3 py-2 text-left font-semibold">Downloads</th></tr></thead>
+                <tbody id="top-domains" class="divide-y divide-gray-100">
+                    {{range .TopDomains}}
+                    <tr><td class="px-3 py-2">{{.Domain}}</td><td class="px-3 py-2">{{.Count}}</td></tr>
+                    {{else}}
+                    <tr><td colspan="2" class="px-3 py-4 text-center text-gray-500">No data</td></tr>
+                    {{end}}
+                </tbody>
+            </table>
+            <!-- Mobile list -->
+            <div id="top-domains-mobile" class="sm:hidden divide-y divide-gray-100">
                 {{range .TopDomains}}
-                <tr><td class="px-3 py-2">{{.Domain}}</td><td class="px-3 py-2">{{.Count}}</td></tr>
+                <div class="flex items-center justify-between px-4 py-3">
+                    <span class="text-sm truncate mr-3">{{.Domain}}</span>
+                    <span class="text-sm font-semibold text-gray-600 shrink-0">{{.Count}}</span>
+                </div>
                 {{else}}
-                <tr><td colspan="2" class="px-3 py-4 text-center text-gray-500">No data</td></tr>
+                <div class="px-4 py-6 text-center text-gray-500 text-sm">No data</div>
                 {{end}}
-            </tbody>
-        </table>
+            </div>
         </div>
     </div>
 
     <div class="mb-6">
         <h2 class="text-lg font-semibold mb-3">Downloads Per Day (Last 30 Days)</h2>
-        <div class="overflow-x-auto">
-        <table class="w-full bg-white rounded-lg shadow text-sm">
-            <thead><tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">Date</th><th class="px-3 py-2 text-left font-semibold">Downloads</th></tr></thead>
-            <tbody id="daily-counts" class="divide-y divide-gray-100">
+        <div class="bg-white rounded-lg shadow">
+            <!-- Desktop table -->
+            <table class="hidden sm:table w-full text-sm">
+                <thead><tr class="bg-gray-50"><th class="px-3 py-2 text-left font-semibold">Date</th><th class="px-3 py-2 text-left font-semibold">Downloads</th></tr></thead>
+                <tbody id="daily-counts" class="divide-y divide-gray-100">
+                    {{range .DailyCounts}}
+                    <tr><td class="px-3 py-2">{{.Date}}</td><td class="px-3 py-2">{{.Count}}</td></tr>
+                    {{else}}
+                    <tr><td colspan="2" class="px-3 py-4 text-center text-gray-500">No data</td></tr>
+                    {{end}}
+                </tbody>
+            </table>
+            <!-- Mobile list -->
+            <div id="daily-counts-mobile" class="sm:hidden divide-y divide-gray-100">
                 {{range .DailyCounts}}
-                <tr><td class="px-3 py-2">{{.Date}}</td><td class="px-3 py-2">{{.Count}}</td></tr>
+                <div class="flex items-center justify-between px-4 py-3">
+                    <span class="text-sm">{{.Date}}</span>
+                    <span class="text-sm font-semibold text-gray-600">{{.Count}}</span>
+                </div>
                 {{else}}
-                <tr><td colspan="2" class="px-3 py-4 text-center text-gray-500">No data</td></tr>
+                <div class="px-4 py-6 text-center text-gray-500 text-sm">No data</div>
                 {{end}}
-            </tbody>
-        </table>
+            </div>
         </div>
     </div>
 </div>
@@ -67,16 +91,32 @@
 
         if (s.TopDomains && s.TopDomains.length > 0) {
             const domains = document.getElementById('top-domains');
-            domains.innerHTML = s.TopDomains.map(d =>
-                '<tr><td class="px-3 py-2">' + escapeHtml(d.Domain) + '</td><td class="px-3 py-2">' + d.Count + '</td></tr>'
-            ).join('');
+            if (domains) {
+                domains.innerHTML = s.TopDomains.map(d =>
+                    '<tr><td class="px-3 py-2">' + escapeHtml(d.Domain) + '</td><td class="px-3 py-2">' + d.Count + '</td></tr>'
+                ).join('');
+            }
+            const domainsMobile = document.getElementById('top-domains-mobile');
+            if (domainsMobile) {
+                domainsMobile.innerHTML = s.TopDomains.map(d =>
+                    '<div class="flex items-center justify-between px-4 py-3"><span class="text-sm truncate mr-3">' + escapeHtml(d.Domain) + '</span><span class="text-sm font-semibold text-gray-600 shrink-0">' + d.Count + '</span></div>'
+                ).join('');
+            }
         }
 
         if (s.DailyCounts && s.DailyCounts.length > 0) {
             const daily = document.getElementById('daily-counts');
-            daily.innerHTML = s.DailyCounts.map(d =>
-                '<tr><td class="px-3 py-2">' + escapeHtml(d.Date) + '</td><td class="px-3 py-2">' + d.Count + '</td></tr>'
-            ).join('');
+            if (daily) {
+                daily.innerHTML = s.DailyCounts.map(d =>
+                    '<tr><td class="px-3 py-2">' + escapeHtml(d.Date) + '</td><td class="px-3 py-2">' + d.Count + '</td></tr>'
+                ).join('');
+            }
+            const dailyMobile = document.getElementById('daily-counts-mobile');
+            if (dailyMobile) {
+                dailyMobile.innerHTML = s.DailyCounts.map(d =>
+                    '<div class="flex items-center justify-between px-4 py-3"><span class="text-sm">' + escapeHtml(d.Date) + '</span><span class="text-sm font-semibold text-gray-600">' + d.Count + '</span></div>'
+                ).join('');
+            }
         }
     };
     es.onerror = function() {

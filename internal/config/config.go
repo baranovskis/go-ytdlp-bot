@@ -50,19 +50,13 @@ type Dashboard struct {
 	Password string `yaml:"password"`
 }
 
-type AccessControl struct {
-	Enabled      bool `yaml:"enabled"`
-	DefaultAllow bool `yaml:"defaultAllow"`
-}
-
 type Config struct {
-	Verbose       bool          `yaml:"verbose"`
-	Storage       Storage       `yaml:"storage"`
-	Bot           Bot           `yaml:"bot"`
-	Cache         Cache         `yaml:"cache"`
-	Database      Database      `yaml:"database"`
-	Dashboard     Dashboard     `yaml:"dashboard"`
-	AccessControl AccessControl `yaml:"accessControl"`
+	Verbose   bool      `yaml:"verbose"`
+	Storage   Storage   `yaml:"storage"`
+	Bot       Bot       `yaml:"bot"`
+	Cache     Cache     `yaml:"cache"`
+	Database  Database  `yaml:"database"`
+	Dashboard Dashboard `yaml:"dashboard"`
 }
 
 func GetConfiguration(configPath string) (*Config, error) {

@@ -115,38 +115,37 @@ func (b *Bot) downloadVideoHandler(ctx context.Context, chat *bot.Bot, update *m
 		return
 	}
 
-	// Auto-register user so admin can discover and approve them
 	uname := update.Message.From.Username
 	if uname == "" {
 		uname = update.Message.From.FirstName
 	}
-	b.DB.RegisterUser(update.Message.From.ID, uname)
 
-	if b.Config.AccessControl.Enabled {
-		chatID := update.Message.Chat.ID
-		userID := update.Message.From.ID
+	chatID := update.Message.Chat.ID
+	userID := update.Message.From.ID
+	isGroup := update.Message.Chat.Type == "group" || update.Message.Chat.Type == "supergroup"
 
-		// Check if group is pending — silently ignore
-		pending, _ := b.DB.IsGroupPending(chatID)
-		if pending {
-			return
-		}
-
-		// Check group access
+	if isGroup {
 		groupAllowed, _ := b.DB.IsGroupAllowed(chatID)
-		if !groupAllowed && !b.Config.AccessControl.DefaultAllow {
+		if !groupAllowed {
+			title := update.Message.Chat.Title
+			if err := b.DB.AddPendingGroup(chatID, title); err != nil {
+				b.Logger.Error().
+					Int64("chat_id", chatID).
+					Str("reason", err.Error()).
+					Msg("failed add pending group")
+			}
 			b.Logger.Warn().
 				Int64("chat_id", chatID).
-				Int64("user_id", userID).
-				Msg("access denied: group not allowed")
+				Str("title", title).
+				Msg("access denied: group not allowed, registered as pending")
 			return
 		}
+	} else {
+		b.DB.RegisterUser(userID, uname)
 
-		// Check user access
 		userAllowed, _ := b.DB.IsUserAllowed(userID)
-		if !userAllowed && !b.Config.AccessControl.DefaultAllow {
+		if !userAllowed {
 			b.Logger.Warn().
-				Int64("chat_id", chatID).
 				Int64("user_id", userID).
 				Msg("access denied: user not allowed")
 			return
@@ -165,7 +164,6 @@ func (b *Bot) downloadVideoHandler(ctx context.Context, chat *bot.Bot, update *m
 		Str("url", u.String()).
 		Msg("triggered video download")
 
-	// Apply filters from DB before using URL as cache key
 	var cookiesFile string
 	dbFilters, _ := b.DB.ListFilters()
 	for _, filter := range dbFilters {
@@ -297,7 +295,6 @@ func (b *Bot) myChatMemberHandler(ctx context.Context, chat *bot.Bot, update *mo
 		return
 	}
 
-	// Only handle when bot is added to a group (type changes to "member" or "administrator")
 	newType := member.NewChatMember.Type
 	if newType != models.ChatMemberTypeMember && newType != models.ChatMemberTypeAdministrator {
 		return

@@ -7,3 +7,4 @@ services:
       - no-new-privileges:true
     volumes:
       - ./config.yaml:/app/config.yaml:ro
+      - ./data:/app/data

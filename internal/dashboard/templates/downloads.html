@@ -3,19 +3,20 @@
 <h1 class="text-2xl font-bold mb-6">Download History</h1>
 
 <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-    <form method="GET" action="/downloads" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-        <select name="status" class="px-3 py-2 border border-gray-300 rounded text-sm">
+    <form method="GET" action="/downloads" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full sm:w-auto">
+        <select name="status" class="px-3 py-2 border border-gray-300 rounded text-sm bg-white">
             <option value="">All Statuses</option>
             <option value="success" {{if eq .Status "success"}}selected{{end}}>Success</option>
             <option value="failed" {{if eq .Status "failed"}}selected{{end}}>Failed</option>
             <option value="pending" {{if eq .Status "pending"}}selected{{end}}>Pending</option>
         </select>
-        <button type="submit" class="bg-gray-900 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-800">Filter</button>
+        <button type="submit" class="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-800">Filter</button>
     </form>
     <span class="text-gray-500 text-sm">Total: {{.Total}}</span>
 </div>
 
-<div class="overflow-x-auto">
+<!-- Desktop table -->
+<div class="hidden md:block overflow-x-auto">
 <table class="w-full bg-white rounded-lg shadow text-sm">
     <thead>
         <tr class="bg-gray-50">
@@ -49,6 +50,29 @@
         {{end}}
     </tbody>
 </table>
+</div>
+
+<!-- Mobile cards -->
+<div class="md:hidden space-y-3">
+    {{range .Downloads}}
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-400 font-mono">#{{.ID}}</span>
+            {{if eq .Status "success"}}<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">success</span>
+            {{else if eq .Status "failed"}}<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">failed</span>
+            {{else}}<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">{{.Status}}</span>
+            {{end}}
+        </div>
+        <div class="text-sm font-medium truncate mb-1" title="{{.URL}}">{{.URL}}</div>
+        {{if .Filename}}<div class="text-xs text-gray-500 truncate mb-2" title="{{.Filename}}">{{.Filename}}</div>{{end}}
+        <div class="flex items-center justify-between text-xs text-gray-400">
+            <span>{{.TelegramUsername}}</span>
+            <span>{{.CreatedAt.Format "Jan 02, 15:04"}}</span>
+        </div>
+    </div>
+    {{else}}
+    <div class="bg-white rounded-lg shadow p-6 text-center text-gray-500 text-sm">No downloads found</div>
+    {{end}}
 </div>
 
 {{if gt .TotalPages 1}}

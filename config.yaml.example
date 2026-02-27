@@ -11,6 +11,3 @@ dashboard:
   port: 8080
   username: "admin"
   password: "changeme"
-accessControl:
-  enabled: false
-  defaultAllow: true

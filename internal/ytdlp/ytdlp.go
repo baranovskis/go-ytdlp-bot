@@ -15,9 +15,11 @@ type YtDlp struct {
 
 func Init(cfg *config.Config, log zerolog.Logger) *YtDlp {
 	command := ytdlp.New().
-		FormatSort("res,vcodec:h264,h265").
-		Format("bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4").
+		FormatSort("res,vcodec:h264").
+		Format("bestvideo[vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4").
+		MergeOutputFormat("mp4").
 		RecodeVideo("mp4").
+		PostProcessorArgs("ffmpeg:-c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -c:a aac -movflags +faststart").
 		NoOverwrites().
 		NoPlaylist().
 		PlaylistItems("1:1").

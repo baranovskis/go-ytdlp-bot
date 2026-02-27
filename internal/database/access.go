@@ -20,7 +20,9 @@ type AllowedUser struct {
 
 func (db *DB) AddPendingGroup(chatID int64, title string) error {
 	_, err := db.Exec(
-		`INSERT OR IGNORE INTO allowed_groups (chat_id, title, status) VALUES (?, ?, 'pending')`,
+		`INSERT INTO allowed_groups (chat_id, title, status) VALUES (?, ?, 'pending')
+		 ON CONFLICT(chat_id) DO UPDATE SET title = excluded.title, status = 'pending'
+		 WHERE status != 'approved'`,
 		chatID, title,
 	)
 	return err
@@ -62,12 +64,6 @@ func (db *DB) ListAllowedGroups() ([]AllowedGroup, error) {
 func (db *DB) IsGroupAllowed(chatID int64) (bool, error) {
 	var count int
 	err := db.QueryRow(`SELECT COUNT(*) FROM allowed_groups WHERE chat_id = ? AND status = 'approved'`, chatID).Scan(&count)
-	return count > 0, err
-}
-
-func (db *DB) IsGroupPending(chatID int64) (bool, error) {
-	var count int
-	err := db.QueryRow(`SELECT COUNT(*) FROM allowed_groups WHERE chat_id = ? AND status = 'pending'`, chatID).Scan(&count)
 	return count > 0, err
 }
 
@@ -114,22 +110,7 @@ func (db *DB) ListPendingUsers() ([]AllowedUser, error) {
 	return db.listUsersByStatus("pending")
 }
 
-func (db *DB) IsUserPending(userID int64) (bool, error) {
-	var count int
-	err := db.QueryRow(`SELECT COUNT(*) FROM allowed_users WHERE user_id = ? AND status = 'pending'`, userID).Scan(&count)
-	return count > 0, err
-}
-
 // Allowed users
-
-func (db *DB) AddAllowedUser(userID int64, username string) error {
-	_, err := db.Exec(
-		`INSERT INTO allowed_users (user_id, username, status) VALUES (?, ?, 'approved')
-		 ON CONFLICT(user_id) DO UPDATE SET username = excluded.username, status = 'approved'`,
-		userID, username,
-	)
-	return err
-}
 
 func (db *DB) RemoveAllowedUser(userID int64) error {
 	_, err := db.Exec(`DELETE FROM allowed_users WHERE user_id = ?`, userID)
