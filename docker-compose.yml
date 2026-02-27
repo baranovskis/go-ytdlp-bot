@@ -8,3 +8,13 @@ services:
     volumes:
       - ./config.yaml:/app/config.yaml:ro
       - ./data:/app/data
+    # GPU passthrough (uncomment for hardware encoding):
+    #
+    # Intel VAAPI (set encoder: "h264_vaapi" in config.yaml):
+    # devices:
+    #   - /dev/dri:/dev/dri
+    #
+    # NVIDIA NVENC (set encoder: "h264_nvenc" in config.yaml):
+    # runtime: nvidia
+    # environment:
+    #   - NVIDIA_VISIBLE_DEVICES=all

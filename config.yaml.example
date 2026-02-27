@@ -14,3 +14,4 @@ dashboard:
 video:
   maxHeight: 720
   threads: 2
+  encoder: "libx264" # libx264 (CPU), h264_nvenc (NVIDIA), h264_vaapi (Intel/AMD), h264_qsv (Intel)

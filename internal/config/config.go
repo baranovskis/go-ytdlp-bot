@@ -51,8 +51,9 @@ type Dashboard struct {
 }
 
 type Video struct {
-	MaxHeight int `yaml:"maxHeight"`
-	Threads   int `yaml:"threads"`
+	MaxHeight int    `yaml:"maxHeight"`
+	Threads   int    `yaml:"threads"`
+	Encoder   string `yaml:"encoder"`
 }
 
 // GetMaxHeight returns the max video height, defaulting to 720.
@@ -69,6 +70,17 @@ func (v *Video) GetThreads() int {
 		return 2
 	}
 	return v.Threads
+}
+
+// GetEncoder returns the video encoder, defaulting to "libx264" (CPU).
+// Supported: libx264, h264_nvenc, h264_vaapi, h264_qsv.
+func (v *Video) GetEncoder() string {
+	switch v.Encoder {
+	case "h264_nvenc", "h264_vaapi", "h264_qsv":
+		return v.Encoder
+	default:
+		return "libx264"
+	}
 }
 
 type Config struct {

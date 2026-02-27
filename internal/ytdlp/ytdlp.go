@@ -14,9 +14,23 @@ type YtDlp struct {
 	Command *ytdlp.Command
 }
 
+func buildFFmpegArgs(encoder string, threads int) string {
+	switch encoder {
+	case "h264_nvenc":
+		return "ffmpeg:-c:v h264_nvenc -preset p4 -cq 23 -pix_fmt yuv420p -c:a aac -movflags +faststart"
+	case "h264_vaapi":
+		return "ffmpeg:-vaapi_device /dev/dri/renderD128 -c:v h264_vaapi -qp 23 -c:a aac -movflags +faststart"
+	case "h264_qsv":
+		return "ffmpeg:-c:v h264_qsv -preset fast -global_quality 23 -c:a aac -movflags +faststart"
+	default:
+		return fmt.Sprintf("ffmpeg:-threads %d -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -c:a aac -movflags +faststart", threads)
+	}
+}
+
 func Init(cfg *config.Config, log zerolog.Logger) *YtDlp {
 	maxHeight := cfg.Video.GetMaxHeight()
 	threads := cfg.Video.GetThreads()
+	encoder := cfg.Video.GetEncoder()
 
 	command := ytdlp.New().
 		FormatSort(fmt.Sprintf("res:%d,vcodec:h264", maxHeight)).
@@ -26,7 +40,7 @@ func Init(cfg *config.Config, log zerolog.Logger) *YtDlp {
 		)).
 		MergeOutputFormat("mp4").
 		RecodeVideo("mp4").
-		PostProcessorArgs(fmt.Sprintf("ffmpeg:-threads %d -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p -c:a aac -movflags +faststart", threads)).
+		PostProcessorArgs(buildFFmpegArgs(encoder, threads)).
 		NoOverwrites().
 		NoPlaylist().
 		PlaylistItems("1:1").
