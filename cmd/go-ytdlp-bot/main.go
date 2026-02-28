@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/baranovskis/go-ytdlp-bot/internal/bot"
 	"github.com/baranovskis/go-ytdlp-bot/internal/config"
@@ -80,7 +81,7 @@ func main() {
 
 	log.Info().Str("path", dbPath).Msg("database initialized")
 
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
 	dash := dashboard.NewServer(cfg.Dashboard, db, log, dbWriter)

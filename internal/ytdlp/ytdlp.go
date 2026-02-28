@@ -19,7 +19,7 @@ func buildFFmpegArgs(encoder string, threads int) string {
 	case "h264_nvenc":
 		return "ffmpeg:-c:v h264_nvenc -preset p4 -cq 23 -pix_fmt yuv420p -c:a aac -movflags +faststart"
 	case "h264_vaapi":
-		return "ffmpeg:-vaapi_device /dev/dri/renderD128 -c:v h264_vaapi -qp 23 -c:a aac -movflags +faststart"
+		return "ffmpeg:-vaapi_device /dev/dri/renderD128 -vf format=nv12,hwupload -c:v h264_vaapi -global_quality 23 -c:a aac -movflags +faststart"
 	case "h264_qsv":
 		return "ffmpeg:-c:v h264_qsv -preset fast -global_quality 23 -c:a aac -movflags +faststart"
 	default:
