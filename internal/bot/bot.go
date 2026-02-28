@@ -202,6 +202,16 @@ func (b *Bot) downloadVideoHandler(ctx context.Context, chat *bot.Bot, update *m
 	})
 
 	if err != nil {
+		if isNoVideoError(err) {
+			b.Logger.Debug().
+				Str("url", cleanURL).
+				Msg("skipped non-video post")
+			if downloadID > 0 {
+				b.DB.UpdateDownloadStatus(downloadID, "skipped", "", err.Error())
+			}
+			return
+		}
+
 		b.Logger.Error().
 			Str("url", cleanURL).
 			Str("reason", err.Error()).
@@ -209,9 +219,11 @@ func (b *Bot) downloadVideoHandler(ctx context.Context, chat *bot.Bot, update *m
 		if downloadID > 0 {
 			b.DB.UpdateDownloadStatus(downloadID, "failed", "", err.Error())
 		}
+
+		errMsg := userFriendlyError(err)
 		chat.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   "Failed to download video.",
+			Text:   errMsg,
 			ReplyParameters: &models.ReplyParameters{
 				MessageID: update.Message.ID,
 				ChatID:    update.Message.Chat.ID,
@@ -331,5 +343,31 @@ func (b *Bot) myChatMemberHandler(ctx context.Context, chat *bot.Bot, update *mo
 			Int64("chat_id", chatID).
 			Str("reason", err.Error()).
 			Msg("failed add pending group")
+	}
+}
+
+func isNoVideoError(err error) bool {
+	msg := err.Error()
+	return strings.Contains(msg, "no video in this post") ||
+		strings.Contains(msg, "There is no video in this post")
+}
+
+func userFriendlyError(err error) string {
+	msg := err.Error()
+	switch {
+	case strings.Contains(msg, "Requested format is not available"):
+		return "Requested video format is not available."
+	case strings.Contains(msg, "Video unavailable"):
+		return "This video is unavailable. It may be private or deleted."
+	case strings.Contains(msg, "Private video"):
+		return "This video is private."
+	case strings.Contains(msg, "Sign in to confirm your age"),
+		strings.Contains(msg, "age-restricted"):
+		return "This video is age-restricted and cannot be downloaded."
+	case strings.Contains(msg, "login required"),
+		strings.Contains(msg, "Login required"):
+		return "Login is required to access this content."
+	default:
+		return "Failed to download video."
 	}
 }
